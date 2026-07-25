@@ -62,8 +62,12 @@ export const CommandsReducer = (state = initialState, action: Action): CommandsS
 			const commandId = state.latestKeyByDeviceAndType[mapKey]
 			if (!commandId) return state
 
-			const { [commandId]: _removed, ...restById } = state.byId
-			const { [mapKey]: _removedKey, ...restKeys } = state.latestKeyByDeviceAndType
+			const restById = Object.fromEntries(
+				Object.entries(state.byId).filter(([id]) => id !== commandId)
+			)
+			const restKeys = Object.fromEntries(
+				Object.entries(state.latestKeyByDeviceAndType).filter(([k]) => k !== mapKey)
+			)
 			return { byId: restById, latestKeyByDeviceAndType: restKeys }
 		}
 
