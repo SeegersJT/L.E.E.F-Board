@@ -8,14 +8,19 @@
 
 unsigned long StatusReporter::lastPush = 0;
 
-void StatusReporter::pushStatus(int moisturePercentage, const String &moistureTimestamp, const String &relayState, const String &relayTimestamp)
+void StatusReporter::pushStatus(
+    int moisturePercentage,
+    const String &moistureTimestamp,
+    const String &relayState,
+    const String &relayTimestamp,
+    bool force)
 {
     if (WiFi.status() != WL_CONNECTED || !FirebaseService::ready())
         return;
 
     unsigned long currentMillis = millis();
 
-    if (lastPush != 0 && currentMillis - lastPush < (unsigned long)config["FIREBASE_PUSH_INTERVAL"])
+    if (!force && lastPush != 0 && currentMillis - lastPush < (unsigned long)config["FIREBASE_PUSH_INTERVAL"])
     {
         return;
     }

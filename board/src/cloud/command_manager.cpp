@@ -21,6 +21,8 @@ unsigned long CommandManager::activeStartedAt = 0;
 unsigned long CommandManager::cooldownUntil = 0;
 String CommandManager::lastRelayTimestampValue = "";
 
+bool CommandManager::relayChanged = false;
+
 void CommandManager::begin(DeviceWrapper<RelayDevice> &relayIn)
 {
     relay = &relayIn;
@@ -281,6 +283,7 @@ void CommandManager::startExecuting(const String &id, bool isSystem, const Strin
     relay->setState("ON");
     String timestamp = currentIsoTimestamp();
     lastRelayTimestampValue = timestamp;
+    relayChanged = true;
 
     StatusReporter::logRelayEvent("ON", timestamp, isSystem, uid, id);
     writeStatus(id, isSystem, uid, requestedAtLiteral, "executing");
@@ -297,6 +300,7 @@ void CommandManager::finishExecuting()
     relay->setState("OFF");
     String timestamp = currentIsoTimestamp();
     lastRelayTimestampValue = timestamp;
+    relayChanged = true;
 
     StatusReporter::logRelayEvent("OFF", timestamp, activeIsSystem, activeUid, activeCommandId);
     writeStatus(activeCommandId, activeIsSystem, activeUid, activeRequestedAtLiteral, "completed");
@@ -307,8 +311,7 @@ void CommandManager::finishExecuting()
     cooldownUntil = millis() + (unsigned long)config["COMMAND_COOLDOWN"];
 }
 
-void CommandManager::writeStatus(const String &commandId, bool isSystem, const String &uid,
-                                 const String &requestedAtLiteral, const String &status)
+void CommandManager::writeStatus(const String &commandId, bool isSystem, const String &uid, const String &requestedAtLiteral, const String &status)
 {
     String payload = "{";
     payload += "\"type\":\"WATER_NOW\",";
@@ -416,4 +419,11 @@ int CommandManager::findMatchingBrace(const String &text, int openIndex)
         }
     }
     return -1;
+}
+
+bool CommandManager::consumeRelayChanged()
+{
+    bool value = relayChanged;
+    relayChanged = false;
+    return value;
 }

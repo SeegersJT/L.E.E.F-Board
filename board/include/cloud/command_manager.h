@@ -26,6 +26,8 @@ public:
     static String relayState();
     static const String &lastRelayTimestamp();
 
+    static bool consumeRelayChanged();
+
 private:
     struct QueuedCommand
     {
@@ -50,6 +52,8 @@ private:
 
     static unsigned long cooldownUntil;
     static String lastRelayTimestampValue;
+
+    static bool relayChanged;
 
     static void startStream();
     static void streamCallback(AsyncResult &aResult);

@@ -14,6 +14,8 @@ public:
     int lastMoisturePercentage() const;
     const String &lastMoistureTimestamp() const;
 
+    bool consumeMoistureChanged();
+
 private:
     DeviceWrapper<MoistureDevice> &moisture;
 
@@ -21,6 +23,9 @@ private:
     int pulseCount;
     int lastMoisture;
     String moistureTimestampValue;
+
+    bool moistureChanged;
+
     String activeCommandId;
     unsigned long settleStartedAt;
 

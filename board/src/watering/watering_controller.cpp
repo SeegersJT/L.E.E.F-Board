@@ -4,8 +4,13 @@
 #include "core/globals.h"
 #include "core/time_utils.h"
 
-WateringController::WateringController(DeviceWrapper<MoistureDevice> &moisture) : moisture(moisture), state(WateringState::IDLE), pulseCount(0), lastMoisture(-1), settleStartedAt(0) {}
-
+WateringController::WateringController(DeviceWrapper<MoistureDevice> &moisture)
+    : moisture(moisture),
+      state(WateringState::IDLE),
+      pulseCount(0),
+      lastMoisture(-1),
+      settleStartedAt(0),
+      moistureChanged(false) {}
 int WateringController::lastMoisturePercentage() const
 {
     return lastMoisture;
@@ -40,6 +45,7 @@ void WateringController::takeReading()
 
     lastMoisture = moisturePercentage;
     moistureTimestampValue = currentIsoTimestamp();
+    moistureChanged = true;
 
     StatusReporter::logMoistureReading(moisturePercentage, moistureTimestampValue);
 
@@ -128,4 +134,11 @@ void WateringController::handlePulseSettle(unsigned long currentMillis)
             state = WateringState::IDLE;
         }
     }
+}
+
+bool WateringController::consumeMoistureChanged()
+{
+    bool value = moistureChanged;
+    moistureChanged = false;
+    return value;
 }

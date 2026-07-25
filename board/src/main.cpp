@@ -149,13 +149,16 @@ void loop()
 
     if (FirebaseService::ready())
     {
+        bool eventHappened = CommandManager::consumeRelayChanged() || wateringController->consumeMoistureChanged();
+
         if (wateringController->lastMoisturePercentage() >= 0)
         {
             StatusReporter::pushStatus(
                 wateringController->lastMoisturePercentage(),
                 wateringController->lastMoistureTimestamp(),
                 CommandManager::relayState(),
-                CommandManager::lastRelayTimestamp());
+                CommandManager::lastRelayTimestamp(),
+                eventHappened);
         }
 
         OtaManager::checkForUpdate();
