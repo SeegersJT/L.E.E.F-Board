@@ -7,10 +7,13 @@ import {
 	orderByKey,
 	startAt,
 	type DataSnapshot,
+	push,
+	set,
 } from 'firebase/database'
 import { rtdb } from './config'
 import type { DeviceStatus } from '@/redux/types/Device.type'
 import type { MoistureHistoryPoint, RelayHistoryPoint } from '@/redux/types/DeviceHistory.type'
+import { serverTimestamp } from 'firebase/firestore'
 
 export interface UserDeviceEntry {
 	id: string
@@ -126,6 +129,48 @@ export const rtdbService = {
 		await update(ref(rtdb), {
 			[`devices/${deviceId}/owner`]: null,
 			[`users/${uid}/devices/${deviceId}`]: null,
+		})
+	},
+
+	sendCommand: async ({
+		deviceId,
+		uid,
+		type,
+		params,
+	}: {
+		deviceId: string
+		uid: string
+		type: string
+		params?: Record<string, unknown>
+	}): Promise<string> => {
+		const commandsRef = ref(rtdb, `devices/${deviceId}/commands`)
+		const newCommandRef = push(commandsRef)
+		const commandId = newCommandRef.key
+
+		if (!commandId) {
+			throw new Error('Failed to generate a command id')
+		}
+
+		await set(newCommandRef, {
+			type,
+			requestedBy: { kind: 'user', uid },
+			requestedAt: serverTimestamp(),
+			status: 'pending',
+			statusUpdatedAt: serverTimestamp(),
+			...(params ? { params } : {}),
+		})
+
+		return commandId
+	},
+
+	subscribeToCommandStatus: (
+		deviceId: string,
+		commandId: string,
+		callback: (status: string | null) => void
+	) => {
+		const statusRef = ref(rtdb, `devices/${deviceId}/commands/${commandId}/status`)
+		return onValue(statusRef, (snapshot: DataSnapshot) => {
+			callback(snapshot.exists() ? (snapshot.val() as string) : null)
 		})
 	},
 }

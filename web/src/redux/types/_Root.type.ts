@@ -4,6 +4,7 @@ import type { DeviceState } from './Device.type'
 import type { PairingState } from './Pairing.type'
 import type { DeviceHistoryState } from './DeviceHistory.type'
 import type { DeviceRemovalState } from './DeviceRemoval.type'
+import type { CommandsState } from './Command.type'
 
 export interface RootState {
 	system: {
@@ -14,4 +15,5 @@ export interface RootState {
 	pairing: PairingState
 	deviceHistory: DeviceHistoryState
 	deviceRemoval: DeviceRemovalState
+	commands: CommandsState
 }

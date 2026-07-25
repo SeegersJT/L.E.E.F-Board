@@ -3,8 +3,9 @@ import { notificationSaga } from './Notification.saga'
 import { authSaga } from './Authentication.saga'
 import { deviceSaga } from './Device.saga'
 import { pairingSaga } from './Pairing.saga'
-import { deviceRemovalSaga } from './DeviceRemoval.saga'
 import { deviceHistorySaga } from './DeviceHistory.saga'
+import { deviceRemovalSaga } from './DeviceRemoval.saga'
+import { commandsSaga } from './Command.saga'
 
 export function* RootSaga() {
 	yield all([
@@ -14,5 +15,6 @@ export function* RootSaga() {
 		pairingSaga(),
 		deviceHistorySaga(),
 		deviceRemovalSaga(),
+		commandsSaga(),
 	])
 }
